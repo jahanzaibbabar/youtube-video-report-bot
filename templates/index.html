@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube Video Report</title>
+    <style>
+        body { font-family: Arial; background: #f3f3f3; padding: 30px; }
+        .container { background: white; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; }
+        input, select, textarea, button { width: 100%; padding: 10px; margin: 10px 0; }
+        .success { background: #d4edda; padding: 10px; border-left: 5px solid green; margin-bottom: 15px; }
+        .error { background: #f8d7da; padding: 10px; border-left: 5px solid red; margin-bottom: 15px; }
+        iframe { margin-top: 20px; width: 100%; height: 300px; }
+        .thumb { width: 100%; border-radius: 8px; margin-top: 10px; }
+        ul { padding-left: 20px; }
+        h2, h3 { color: #333; }
+        a { color: #0275d8; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🎯 YouTube Reporting Tool</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="{% if category == 'success' %}success{% else %}error{% endif %}">
+                        {% if category == 'success' %}✅{% else %}❌{% endif %} {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('submit_report') }}">
+            <label>Video URL:</label>
+            <input type="text" name="video_url" required placeholder="https://www.youtube.com/watch?v=xxxxx">
+            
+            <label>Report Category:</label>
+            <select name="report_category" required>
+                <option value="">-- Select Reason --</option>
+                <option value="sexual">Sexual content</option>
+                <option value="violent">Violent or repulsive content</option>
+                <option value="hateful">Hateful or abusive content</option>
+                <option value="harassment">Harassment or bullying</option>
+                <option value="harmful">Harmful or dangerous acts</option>
+                <option value="misinformation">Misinformation</option>
+                <option value="child">Child abuse</option>
+                <option value="terrorism">Promotes terrorism</option>
+                <option value="spam">Spam or misleading</option>
+                <option value="legal">Legal issue</option>
+            </select>
+            
+            <label>Additional Details (Optional):</label>
+            <textarea name="report_details" rows="4" placeholder="Provide any additional information about your report..."></textarea>
+
+            <button type="submit">🚀 Submit Report</button>
+        </form>
+
+        {% if video_url %}
+        <h3>🎥 Video Preview:</h3>
+        {% set video_id = video_url.split('v=')[-1].split('&')[0] if 'v=' in video_url else (video_url.split('youtu.be/')[-1] if 'youtu.be/' in video_url else '') %}
+        <iframe src="https://www.youtube.com/embed/{{ video_id }}" frameborder="0" allowfullscreen></iframe>
+        
+        <h3>🖼️ Screenshot / Thumbnail:</h3>
+        <img src="https://img.youtube.com/vi/{{ video_id }}/0.jpg" alt="Thumbnail" class="thumb">
+        {% endif %}
+
+        <h3>📜 Recent Reports</h3>
+        {% if reports %}
+            <ul>
+                {% for report in reports %}
+                <li>
+                    <a href="{{ report.video_url }}" target="_blank">{{ report.video_url }}</a> - 
+                    {{ report.report_category }} 
+                    <small>({{ report.format_timestamp() }})</small>
+                </li>
+                {% endfor %}
+            </ul>
+            <p><a href="{{ url_for('history') }}">View all reports →</a></p>
+        {% else %}
+            <p>No reports submitted yet.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

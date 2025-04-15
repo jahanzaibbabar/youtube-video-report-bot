@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Report History - YouTube Video Report</title>
+    <style>
+        body { font-family: Arial; background: #f3f3f3; padding: 30px; }
+        .container { background: white; padding: 20px; border-radius: 10px; max-width: 800px; margin: auto; }
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f1f1f1; }
+        .badge { 
+            display: inline-block; 
+            padding: 5px 10px; 
+            border-radius: 4px; 
+            background-color: #0275d8; 
+            color: white; 
+            font-size: 12px; 
+        }
+        a { color: #0275d8; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .success, .error { padding: 10px; margin-bottom: 15px; }
+        .success { background: #d4edda; border-left: 5px solid green; }
+        .error { background: #f8d7da; border-left: 5px solid red; }
+        .btn {
+            display: inline-block;
+            padding: 8px 16px;
+            background-color: #0275d8;
+            color: white;
+            border-radius: 4px;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background-color: #025aa5;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>📋 YouTube Report History</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="{% if category == 'success' %}success{% else %}error{% endif %}">
+                        {% if category == 'success' %}✅{% else %}❌{% endif %} {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <a href="{{ url_for('index') }}" class="btn">← Back to Report Form</a>
+        
+        {% if reports %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Video URL</th>
+                        <th>Category</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for report in reports %}
+                    <tr>
+                        <td>{{ report.id }}</td>
+                        <td><a href="{{ report.video_url }}" target="_blank">{{ report.video_url }}</a></td>
+                        <td><span class="badge">{{ report.report_category }}</span></td>
+                        <td>{{ report.format_timestamp() }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No reports have been submitted yet.</p>
+        {% endif %}
+        
+        <a href="{{ url_for('index') }}" class="btn">Submit Another Report</a>
+    </div>
+</body>
+</html>
