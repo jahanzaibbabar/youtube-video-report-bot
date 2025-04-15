@@ -107,9 +107,8 @@ def send_email_notification(video_url, report_category, report_details):
 # Routes
 @app.route('/', methods=["GET", "POST"])
 def index():
-    video_url = None
+    screenshot_path = request.args.get('screenshot_path', None)
     recent_reports = []
-
     # Get 5 most recent reports
     try:
         recent_reports = VideoReport.query.order_by(
@@ -117,61 +116,10 @@ def index():
     except Exception as e:
         app.logger.error(f"Error fetching recent reports: {str(e)}")
 
-    # Handle form submission directly
-    # if request.method == "POST":
-    #     video_url = request.form.get('video_url', '')
-    #     report_category = request.form.get('report_category', '')
-    #     report_details = request.form.get('report_details', '')
-
-    #     # Simple validation
-    #     if not video_url or not report_category:
-    #         flash('Please fill in all required fields.', 'danger')
-    #         return render_template('index.html', reports=recent_reports)
-        
-    #     # report video
-    #     report_video(video_url, report_category, report_details)
-
-    #     try:
-    #         # Create a new report
-    #         new_report = VideoReport(video_url=video_url,
-    #                                  report_category=report_category,
-    #                                  report_details=report_details,
-    #                                  timestamp=datetime.now())
-
-    #         # Add to database and commit
-    #         db.session.add(new_report)
-    #         db.session.commit()
-
-    #         # Send email notification
-    #         email_sent = send_email_notification(video_url, report_category,
-    #                                              report_details)
-
-    #         if email_sent:
-    #             flash(
-    #                 'Your report has been submitted successfully and administrators were notified.',
-    #                 'success')
-    #         else:
-    #             flash('Your report has been submitted successfully!',
-    #                   'success')
-
-    #         # Update recent reports after submission
-    #         recent_reports = VideoReport.query.order_by(
-    #             VideoReport.timestamp.desc()).limit(5).all()
-
-    #         return render_template('index.html',
-    #                                reports=recent_reports,
-    #                                video_url=video_url)
-
-    #     except Exception as e:
-    #         db.session.rollback()
-    #         app.logger.error(f"Error submitting report: {str(e)}")
-    #         flash(
-    #             'An error occurred while submitting your report. Please try again.',
-    #             'danger')
 
     return render_template('index.html',
                            reports=recent_reports,
-                           video_url=video_url)
+                           screenshot_path=screenshot_path)
 
 
 @app.route('/submit_report', methods=['POST'])
@@ -179,6 +127,7 @@ def submit_report():
     video_url = request.form.get('video_url', '')
     report_category = request.form.get('report_category', '')
     report_details = request.form.get('report_details', '')
+    screenshot_path = None
 
     # Simple validation
     if not video_url or not report_category:
@@ -186,12 +135,13 @@ def submit_report():
         return redirect(url_for('index'))
     
     # report video
-    success = report_video(video_url, report_category, report_details)
+    success, screenshot_path = report_video(video_url, report_category, report_details)
     if not success:
         flash('Failed to report the video. Please try again.', 'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('index', screenshot_path=screenshot_path ))
+    
     app.logger.info(
-        f"Video reported failed: {video_url}, Category: {report_category}"
+        f"Video reported successfully: {video_url}, Category: {report_category}"
     )
     
         
@@ -217,7 +167,7 @@ def submit_report():
         else:
             flash('Your report has been submitted successfully!', 'success')
 
-        return redirect(url_for('index'))
+        return redirect(url_for('index', screenshot_path=screenshot_path))
 
     except Exception as e:
         db.session.rollback()
@@ -225,7 +175,7 @@ def submit_report():
         flash(
             'An error occurred while submitting your report. Please try again.',
             'danger')
-        return redirect(url_for('index'))
+        return redirect(url_for('index', screenshot_path=screenshot_path))
 
 
 @app.route('/history')

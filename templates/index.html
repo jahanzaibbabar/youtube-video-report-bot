@@ -46,7 +46,6 @@
                 <option value="child">Child abuse</option>
                 <option value="terrorism">Promotes terrorism</option>
                 <option value="spam">Spam or misleading</option>
-                <option value="legal">Legal issue</option>
             </select>
             
             <label>Additional Details (Optional):</label>
@@ -55,13 +54,10 @@
             <button type="submit">🚀 Submit Report</button>
         </form>
 
-        {% if video_url %}
-        <h3>🎥 Video Preview:</h3>
-        {% set video_id = video_url.split('v=')[-1].split('&')[0] if 'v=' in video_url else (video_url.split('youtu.be/')[-1] if 'youtu.be/' in video_url else '') %}
-        <iframe src="https://www.youtube.com/embed/{{ video_id }}" frameborder="0" allowfullscreen></iframe>
-        
-        <h3>🖼️ Screenshot / Thumbnail:</h3>
-        <img src="https://img.youtube.com/vi/{{ video_id }}/0.jpg" alt="Thumbnail" class="thumb">
+        {% if screenshot_path %}
+
+        <h3>🖼️ Screenshot:</h3>
+        <img src="{{screenshot_path}}" alt="screenshot" class="thumb">
         {% endif %}
 
         <h3>📜 Recent Reports</h3>

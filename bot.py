@@ -48,8 +48,9 @@ logging.basicConfig(
 logger = logging.getLogger('youtube_reporter')
 
 # Create directory for screenshots if it doesn't exist
-SCREENSHOTS_DIR = 'screenshots'
+SCREENSHOTS_DIR = 'static/screenshots'
 os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
+latest_screenshot = None
 
 # Report type mapping - Updated for latest YouTube reporting options
 REPORT_TYPES = {
@@ -59,11 +60,13 @@ REPORT_TYPES = {
     "harmful": "Harmful or dangerous acts",
     "harassment": "Harassment or bullying",
     "spam": "Spam or misleading",
-    "legal": "Legal issues", 
+    "legal": "Legal issue", 
     "child": "Child abuse",
     "terrorism": "Promotes terrorism",
     "misinformation": "Misinformation",
 }
+
+not_sub_option = ['child', 'terrorism', 'misinformation']
 
 class YouTubeReporter:
     """Class to handle YouTube video reporting automation using undetected-chromedriver."""
@@ -119,12 +122,7 @@ class YouTubeReporter:
             except Exception as e:
                 logger.error(f"Failed to initialize undetected ChromeDriver: {str(e)}")
                 # Try to save a screenshot if an error occurs during initialization
-                try:
-                    error_screenshot_path = os.path.join(SCREENSHOTS_DIR, f"driver_init_error_{timestamp}.png")
-                    self.driver.save_screenshot(error_screenshot_path)
-                    logger.info(f"Saved error screenshot to {error_screenshot_path}")
-                except:
-                    logger.error("Could not save error screenshot during driver initialization")
+               
                 return False
             
             # Load cookies if provided
@@ -180,6 +178,8 @@ class YouTubeReporter:
             screenshot_path = os.path.join(SCREENSHOTS_DIR, filename)
             self.driver.save_screenshot(screenshot_path)
             logger.info(f"Screenshot saved to {screenshot_path}")
+            global latest_screenshot
+            latest_screenshot = screenshot_path
         except Exception as e:
             logger.error(f"Failed to take screenshot: {str(e)}")
 
@@ -310,6 +310,8 @@ class YouTubeReporter:
             
             self.human_like_scroll('down', 200)
             
+            self.human_like_delay(4.0, 6.0)  # Wait for the page to settle
+            
             more_action_xpath = '//yt-button-shape/button[@aria-label="More actions"]'
             element = wait.until(EC.visibility_of_element_located((By.XPATH, more_action_xpath)))
             # for selector in title_menu_selectors:
@@ -331,7 +333,9 @@ class YouTubeReporter:
                 more_actions_button.click()
             except Exception as e:
                 logger.warning(f"Standard click failed: {e}. Trying JavaScript click.")
-                self.driver.execute_script("arguments[0].click();", more_actions_button)
+                # self.driver.execute_script("arguments[0].click();", more_actions_button)
+                self.take_screenshot("more_actions_click_error")
+                return False
             
             logger.info("Clicked 'More actions' button")
             self.human_like_delay(1.0, 2.0)  # Wait for menu to appear
@@ -355,7 +359,9 @@ class YouTubeReporter:
                 report_button.click()
             except Exception as e:
                 logger.warning(f"Standard click failed: {e}. Trying JavaScript click.")
-                self.driver.execute_script("arguments[0].click();", report_button)
+                # self.driver.execute_script("arguments[0].click();", report_button)
+                self.take_screenshot("report_option_click_error")
+                return False
                 
             logger.info("Clicked 'Report' option")
             self.human_like_delay(1.0, 2.0)  # Wait for report dialog to appear
@@ -386,39 +392,6 @@ class YouTubeReporter:
             logger.info("Report dialog opened successfully")
             return True
             
-        except ElementClickInterceptedException as e:
-            logger.error(f"Element click was intercepted, possibly by a popup or overlay: {str(e)}")
-            self.take_screenshot("click_intercepted")
-            try:
-                # Try to dismiss any interceptions
-                self.driver.execute_script("""
-                    var elements = document.querySelectorAll('button, .ytp-ad-skip-button, .ytp-ad-overlay-close-button');
-                    for (var i = 0; i < elements.length; i++) {
-                        if (elements[i].innerText.includes('Close') || 
-                            elements[i].innerText.includes('Dismiss') || 
-                            elements[i].innerText.includes('Skip')) {
-                            elements[i].click();
-                        }
-                    }
-                """)
-            except:
-                pass
-            return False
-            
-        except StaleElementReferenceException:
-            logger.error("Element reference is stale, the page may have been updated")
-            self.take_screenshot("stale_element")
-            return False
-            
-        except (NoSuchElementException, TimeoutException) as e:
-            logger.error(f"Could not find report elements: {str(e)}")
-            self.take_screenshot("element_not_found")
-            return False
-            
-        except WebDriverException as e:
-            logger.error(f"Error opening report dialog: {str(e)}")
-            self.take_screenshot("webdriver_error")
-            return False
             
         except Exception as e:
             logger.error(f"Unexpected error during report dialog opening: {str(e)}")
@@ -444,24 +417,19 @@ class YouTubeReporter:
         reason_text = REPORT_TYPES[report_type]
         
         try:
-            wait = WebDriverWait(self.driver, self.wait_time)
+
             
-          
+           
+            # # Try to get all possible options for debugging
+            # try:
+            #     all_options = self.driver.find_elements(By.XPATH, "//paper-radio-button | //tp-yt-paper-radio-button | //input[@type='radio']/.. | //label | //div[@role='radio'] | //div[@role='option']")
+            #     options_text = [opt.text for opt in all_options if opt.is_displayed()]
+            #     logger.debug(f"Available options: {options_text}")
+            # except:
+            #     pass
             
             reason_xpath = f'//div[@id="options-select"]//yt-formatted-string[contains(text(), "{reason_text}")]/..'
-            
-           
-            # Try to get all possible options for debugging
-            try:
-                all_options = self.driver.find_elements(By.XPATH, "//paper-radio-button | //tp-yt-paper-radio-button | //input[@type='radio']/.. | //label | //div[@role='radio'] | //div[@role='option']")
-                options_text = [opt.text for opt in all_options if opt.is_displayed()]
-                logger.debug(f"Available options: {options_text}")
-            except:
-                pass
-            
             reason_element = self.driver.find_element(By.XPATH, reason_xpath)
-            
-           
             
             if not reason_element:
                 self.take_screenshot("reason_option_not_found")
@@ -475,8 +443,10 @@ class YouTubeReporter:
                 self.human_like_delay(0.3, 0.7)
                 reason_element.click()
             except Exception as e:
-                logger.warning(f"Standard click failed: {e}. Trying JavaScript click.")
-                self.driver.execute_script("arguments[0].click();", reason_element)
+                logger.warning(f"Standard click failed: {e}. ")
+                # self.driver.execute_script("arguments[0].click();", reason_element)
+                self.take_screenshot("reason_option_click_error")
+                return False
                 
             logger.info(f"Selected report reason: {reason_text}")
             self.human_like_delay(1.0, 1.5)  # Wait for UI to update
@@ -484,71 +454,40 @@ class YouTubeReporter:
             # sub_option_dropdown_selectors = '//div[@id="options-select"]//yt-formatted-string[contains(text(), "Harmful")]/..//tp-yt-paper-item:nth-child(2)'
             #######################################
             
-            try:
+            if report_type not in not_sub_option:
                 # click on drop down button
-                
-                # drop_down_button_xpath = f'//div[@id="options-select"]//yt-formatted-string[contains(text(), "{reason_text}")]/ancestor::tp-yt-paper-radio-button/following-sibling::tp-yt-paper-dropdown-menu[1]//input'
-                drop_down_button_xpath = f'//div[@id="options-select"]//yt-formatted-string[contains(text(), "{reason_text}")]/following::input'
-                self.driver.find_element(By.XPATH, drop_down_button_xpath).click()
-                self.human_like_delay(1.0, 1.5)
-                
-                sub_option_dropdown_selectors = f'//div[@id="options-select"]//yt-formatted-string[contains(text(), "{reason_text}")]/following::tp-yt-iron-dropdown[1]//tp-yt-paper-item[2]'
-                sub_option = reason_element.find_element(By.XPATH, sub_option_dropdown_selectors)
-                
                 try:
-                    # Hover over the element first like a human would
-                    ActionChains(self.driver).move_to_element(sub_option).perform()
-                    self.human_like_delay(0.3, 0.7)
-                    sub_option.click()
-                except Exception as e:
-                    logger.warning(f"Standard click failed:. Trying JavaScript click.")
-                    self.driver.execute_script("arguments[0].click();", sub_option)
-                    # return False
+                    # drop_down_button_xpath = f'//div[@id="options-select"]//yt-formatted-string[contains(text(), "{reason_text}")]/ancestor::tp-yt-paper-radio-button/following-sibling::tp-yt-paper-dropdown-menu[1]//input'
+                    drop_down_button_xpath = f'//div[@id="options-select"]//yt-formatted-string[contains(text(), "{reason_text}")]/following::input'
+                    self.driver.find_element(By.XPATH, drop_down_button_xpath).click()
+                    self.human_like_delay(1.0, 1.5)
                     
-                self.human_like_delay(1.0, 1.5)
-            
-            except Exception as e:
-                logger.warning(f"Standard click failed: {e}. Trying JavaScript click.")
-                return False
+                    sub_option_dropdown_selectors = f'//div[@id="options-select"]//yt-formatted-string[contains(text(), "{reason_text}")]/following::tp-yt-iron-dropdown[1]//tp-yt-paper-item[2]'
+                    sub_option = reason_element.find_element(By.XPATH, sub_option_dropdown_selectors)
+                    
+                    try:
+                        # Hover over the element first like a human would
+                        ActionChains(self.driver).move_to_element(sub_option).perform()
+                        self.human_like_delay(0.3, 0.7)
+                        sub_option.click()
+                    except Exception as e:
+                        logger.warning(f"Standard click failed:. Trying JavaScript click.")
+                        # self.driver.execute_script("arguments[0].click();", sub_option)
+                        self.take_screenshot("sub_option_click_error")
+                        return False
+                        
+                    self.human_like_delay(1.0, 1.5)
+                
+                except Exception as e:
+                    logger.warning(f"Standard click failed: {e}. Trying JavaScript click.")
+                    self.take_screenshot("dropdown_click_error")
+                    return False
                 
             self.driver.find_element(By.XPATH, '//*[@id="submit-button"]/yt-button-shape/button').click()
             
             return True
             
-        except ElementClickInterceptedException as e:
-            logger.error(f"Element click was intercepted: {e}")
-            self.take_screenshot("reason_click_intercepted")
-            try:
-                # Try to dismiss any interceptions
-                self.driver.execute_script("""
-                    var elements = document.querySelectorAll('button, .ytp-ad-skip-button');
-                    for (var i = 0; i < elements.length; i++) {
-                        if (elements[i].innerText.includes('Close') || 
-                            elements[i].innerText.includes('Dismiss') || 
-                            elements[i].innerText.includes('Skip')) {
-                            elements[i].click();
-                        }
-                    }
-                """)
-            except:
-                pass
-            return False
-            
-        except StaleElementReferenceException as e:
-            logger.error(f"Element reference is stale: {e}")
-            self.take_screenshot("reason_stale_element")
-            return False
-            
-        except (NoSuchElementException, TimeoutException) as e:
-            logger.error(f"Could not select report reason: {e}")
-            self.take_screenshot("reason_element_not_found")
-            return False
-            
-        except WebDriverException as e:
-            logger.error(f"WebDriver error selecting reason: {e}")
-            self.take_screenshot("reason_webdriver_error")
-            return False
-            
+        
         except Exception as e:
             logger.error(f"Unexpected error selecting report reason: {e}")
             self.take_screenshot("reason_unexpected_error")
@@ -563,56 +502,36 @@ class YouTubeReporter:
             bool: True if the report was submitted successfully, False otherwise
         """
         try:
-            wait = WebDriverWait(self.driver, self.wait_time)
-            max_attempts = 10  # Maximum number of button clicks to prevent infinite loops
-            attempts = 0
-            
-            
-            # wait human
+        
+            # Wait for a human-like delay
             self.human_like_delay(1.0, 2.0)
             
-            # enter text in textarea //*[@id="textarea"]
-            self.driver.find_element(By.XPATH, '//*[@id="textarea"]').send_keys(self.additional_details)
-            self.human_like_delay(1.0, 2.0)
+            try:
+                # Enter text in the textarea if additional details are provided
+                if self.additional_details:
+                    textarea = self.driver.find_element(By.XPATH, '//*[@id="textarea"]')
+                    textarea.clear()  # Clear any pre-filled text
+                    textarea.send_keys(self.additional_details)
+                    logger.info("Entered additional details in the textarea")
+                    self.human_like_delay(1.0, 2.0)
+            except NoSuchElementException:
+                logger.warning("Textarea for additional details not found. Skipping this step.")
             
-            # report //*[@id="submit-button"]/yt-button-renderer/yt-button-shape/button
-            self.driver.find_element(By.XPATH, '//*[@id="submit-button"]/yt-button-renderer/yt-button-shape/button').click()
+            try:
+                # Click the submit button
+                submit_button = self.driver.find_element(By.XPATH, '//*[@id="submit-button"]/yt-button-renderer/yt-button-shape/button')
+                submit_button.click()
+                logger.info("Clicked the submit button")
+                self.human_like_delay(1.0, 2.0)
+            except NoSuchElementException:
+                logger.error("Submit button not found. Unable to submit the report.")
+                self.take_screenshot("submit_button_not_found")
+                return False
             
-            self.human_like_delay(1.0, 2.0)
-            
-            # Take screenshot after clicking submit
+            # Take a screenshot after clicking submit
             self.take_screenshot("final_after_submit_click")
             return True
     
-            
-        except ElementClickInterceptedException as e:
-            logger.error(f"Element click was intercepted: {e}")
-            self.take_screenshot("submit_click_intercepted")
-            try:
-                # Try to dismiss any interceptions
-                self.driver.execute_script("""
-                    var elements = document.querySelectorAll('button, .ytp-ad-skip-button');
-                    for (var i = 0; i < elements.length; i++) {
-                        if (elements[i].innerText.includes('Close') || 
-                            elements[i].innerText.includes('Dismiss') || 
-                            elements[i].innerText.includes('Skip')) {
-                            elements[i].click();
-                        }
-                    }
-                """)
-                # One more attempt after trying to clear obstructions
-                button = self.driver.find_element(By.XPATH, "//button[contains(text(), 'Submit')]")
-                if button and button.is_displayed():
-                    button.click()
-                    return True
-            except:
-                pass
-            return False
-            
-        except WebDriverException as e:
-            logger.error(f"WebDriver error during report submission: {e}")
-            self.take_screenshot("submit_webdriver_error")
-            return False
             
         except Exception as e:
             logger.error(f"Unexpected error during report submission: {e}")
@@ -684,17 +603,17 @@ class YouTubeReporter:
             
             return success
 
-
 def report_video(url, report_type, additional_details=''):
     """Main entry point for the script."""
-    
+    global latest_screenshot
+    latest_screenshot = None
     
     # url = "https://www.youtube.com/watch?v=vzCqJGO80Is"
     # type1 = "misinformation"
     
     # Create the YouTube reporter
     reporter = YouTubeReporter(
-        headless=False,
+        headless=True,
         cookies_path=False,
         additional_details=additional_details,
     )
@@ -704,12 +623,10 @@ def report_video(url, report_type, additional_details=''):
     
     if success:
         print("\n✅ Video reported successfully!")
-        print(f"Screenshots saved to {SCREENSHOTS_DIR}/")
-        return True
+        return True, latest_screenshot
     else:
         print("\n❌ Failed to report the video. Check the logs for details.")
-        print(f"Debug screenshots saved to {SCREENSHOTS_DIR}/")
-        return False
+        return False, latest_screenshot
 
 if __name__ == "__main__":
     report_video()
