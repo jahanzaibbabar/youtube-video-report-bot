@@ -644,6 +644,36 @@ class YouTubeReporter:
             logger.info(f"Selected report reason: {reason_text}")
             self.human_like_delay(1.0, 1.5)  # Wait for UI to update
             
+            # sub_option_dropdown_selectors = '//div[@id="options-select"]//yt-formatted-string[contains(text(), "Harmful")]/..//tp-yt-paper-item:nth-child(2)'
+            
+            # try:
+            #     # click on drop down button
+            #     self.driver.find_element(By.XPATH, '//*[@id="input-6"]/input').click()
+            #     self.human_like_delay(1.0, 1.5)
+                
+            #     sub_option_dropdown_selectors = '//tp-yt-paper-item[2]'
+            #     sub_option = reason_element.find_element(By.XPATH, sub_option_dropdown_selectors)
+                
+            #     try:
+            #         # Hover over the element first like a human would
+            #         ActionChains(self.driver).move_to_element(sub_option).perform()
+            #         self.human_like_delay(0.3, 0.7)
+            #         sub_option.click()
+            #     except Exception as e:
+            #         logger.warning(f"Standard click failed:. Trying JavaScript click.")
+            #         self.driver.execute_script("arguments[0].click();", sub_option)
+                    
+            #     self.human_like_delay(1.0, 1.5)
+            
+            # except Exception as e:
+            #     logger.warning(f"Standard click failed: {e}. Trying JavaScript click.")
+            #     print("No sub option found")
+                
+            self.driver.find_element(By.XPATH, '//*[@id="submit-button"]/yt-button-shape/button').click()
+
+            
+            
+            
             # Take screenshot after selecting main reason
             # self.take_screenshot("after_reason_selection")
             
@@ -658,22 +688,7 @@ class YouTubeReporter:
             #     "//ytd-report-reason-content-renderer//tp-yt-paper-radio-button[2]"
             # ]
             
-            sub_option_dropdown_path = ""
             
-            # Step 1: Click on the dropdown to reveal options
-            dropdown_trigger = wait.until(EC.element_to_be_clickable((By.ID, "menuButton")))
-            dropdown_trigger.click()
-
-            # Step 2: Wait for the dropdown options to be visible
-            options_container = wait.until(EC.visibility_of_element_located((By.ID, "dropdown")))
-
-            # Step 3: Select the desired option by its visible text
-            # Replace 'Promotes hatred or violence' with the exact text of the option you want to select
-            # Step 3: Select the second option (index starts at 1 in XPath)
-            desired_option = wait.until(EC.element_to_be_clickable(
-                (By.XPATH, "(//tp-yt-paper-item)[2]")
-            ))
-            desired_option.click()
             
             # # Try to select the second sub-option
             # second_sub_option_found = False
@@ -729,7 +744,7 @@ class YouTubeReporter:
             #             continue
             
             # Take screenshot after selecting sub-option (if any)
-            self.take_screenshot("after_sub_option_selection")
+            # self.take_screenshot("after_sub_option_selection")
             
             return True
             
@@ -785,204 +800,221 @@ class YouTubeReporter:
             max_attempts = 10  # Maximum number of button clicks to prevent infinite loops
             attempts = 0
             
-            # Find and click the Next/Submit buttons until the report is completed
-            while attempts < max_attempts:
-                attempts += 1
-                
-                # Take a screenshot for debugging before looking for buttons
-                self.take_screenshot(f"submit_attempt_{attempts}")
-                
-                # Check for text area to enter additional details (per user's requirement)
-                text_area_found = False
-                text_area_selectors = [
-                    "//textarea",
-                    "//textarea[@placeholder]",
-                    "//textarea[contains(@aria-label, 'details')]",
-                    "//input[@type='text' and contains(@placeholder, 'details')]",
-                    "//div[@role='textbox']"
-                ]
-                
-                for selector in text_area_selectors:
-                    try:
-                        elements = self.driver.find_elements(By.XPATH, selector)
-                        for element in elements:
-                            try:
-                                if element.is_displayed():
-                                    # Scroll to the text area
-                                    self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
-                                    self.human_like_delay(0.5, 1.0)
-                                    
-                                    # Clear any existing text and focus the field
-                                    element.clear()
-                                    element.click()
-                                    self.human_like_delay(0.3, 0.7)
-                                    
-                                    # Determine what text to enter
-                                    text_to_enter = self.additional_details if self.additional_details else "This content violates community guidelines and is inappropriate."
-                                    
-                                    # Type the text like a human would - character by character with slight delays
-                                    for char in text_to_enter:
-                                        element.send_keys(char)
-                                        self.human_like_delay(0.03, 0.15)  # Very short delays between keystrokes
-                                    
-                                    logger.info("Entered additional details in text area")
-                                    self.human_like_delay(0.8, 1.2)
-                                    text_area_found = True
-                                    
-                                    # Take screenshot after entering details
-                                    self.take_screenshot("after_entering_details")
-                                    break
-                            except:
-                                continue
-                    except:
-                        continue
-                    
-                    if text_area_found:
-                        break
-                
-                # Enhanced button patterns for the latest YouTube UI
-                button_patterns = [
-                    # Submit buttons
-                    "//button[contains(@aria-label, 'Submit')]",
-                    "//button[contains(text(), 'Submit')]",
-                    "//button[contains(., 'Submit')]",
-                    "//paper-button[contains(text(), 'Submit')]",
-                    "//tp-yt-paper-button[contains(text(), 'Submit')]",
-                    "//yt-button-renderer[contains(., 'Submit')]",
-                    "//div[@role='button'][contains(., 'Submit')]",
-                    
-                    # Next buttons
-                    "//button[contains(@aria-label, 'Next')]",
-                    "//button[contains(text(), 'Next')]",
-                    "//button[contains(., 'Next')]",
-                    "//paper-button[contains(text(), 'Next')]",
-                    "//tp-yt-paper-button[contains(text(), 'Next')]",
-                    "//yt-button-renderer[contains(., 'Next')]",
-                    "//div[@role='button'][contains(., 'Next')]",
-                    
-                    # Report buttons (sometimes used as final action)
-                    "//button[contains(text(), 'Report')]",
-                    "//button[contains(., 'Report')]",
-                    "//paper-button[contains(text(), 'Report')]",
-                    "//tp-yt-paper-button[contains(text(), 'Report')]",
-                    
-                    # Send buttons (sometimes used instead of Submit)
-                    "//button[contains(text(), 'Send')]",
-                    "//button[contains(., 'Send')]",
-                    "//paper-button[contains(text(), 'Send')]",
-                    "//tp-yt-paper-button[contains(text(), 'Send')]",
-                    
-                    # Generic buttons that might be used for submission
-                    "//yt-formatted-string[contains(@id, 'submit')]/ancestor::button",
-                    "//yt-formatted-string[contains(@id, 'next')]/ancestor::button",
-                    "//yt-formatted-string[contains(@id, 'report')]/ancestor::button"
-                ]
-                
-                # Try to find any button in the dialog that might be next/submit/report
-                found_button = False
-                for pattern in button_patterns:
-                    try:
-                        elements = self.driver.find_elements(By.XPATH, pattern)
-                        for button in elements:
-                            try:
-                                if button.is_displayed() and button.is_enabled():
-                                    # Try to make button visible and interactable
-                                    self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", button)
-                                    self.human_like_delay(0.5, 1.0)
-                                    
-                                    try:
-                                        # Hover over the button first like a human would
-                                        ActionChains(self.driver).move_to_element(button).perform()
-                                        self.human_like_delay(0.3, 0.7)
-                                        button.click()
-                                    except Exception as e:
-                                        logger.warning(f"Standard click failed: {e}. Trying JavaScript click.")
-                                        self.driver.execute_script("arguments[0].click();", button)
-                                    
-                                    logger.info(f"Clicked button matching pattern: {pattern}")
-                                    found_button = True
-                                    self.human_like_delay(1.5, 2.5)  # Let the UI update
-                                    break
-                            except:
-                                continue
-                        
-                        if found_button:
-                            break
-                    except:
-                        continue
-                
-                if not found_button:
-                    # Check if a success message is visible (various formats)
-                    success_patterns = [
-                        "//yt-formatted-string[contains(text(), 'Thanks for reporting')]",
-                        "//div[contains(text(), 'Thanks for reporting')]",
-                        "//span[contains(text(), 'Thanks for reporting')]",
-                        "//div[contains(text(), 'Thank you for reporting')]",
-                        "//yt-formatted-string[contains(text(), 'Thank you for reporting')]",
-                        "//div[contains(text(), 'has been reported')]",
-                        "//yt-formatted-string[contains(text(), 'has been reported')]",
-                        "//div[contains(@class, 'success-message')]",
-                        "//div[contains(@id, 'success')]",
-                        "//p[contains(text(), 'report') and contains(text(), 'received')]"
-                    ]
-                    
-                    success_found = False
-                    for pattern in success_patterns:
-                        try:
-                            elements = self.driver.find_elements(By.XPATH, pattern)
-                            for element in elements:
-                                if element.is_displayed():
-                                    logger.info(f"Success message found: {element.text}")
-                                    success_found = True
-                                    break
-                            if success_found:
-                                break
-                        except:
-                            continue
-                    
-                    if success_found:
-                        # Take a final success screenshot
-                        self.take_screenshot("report_success")
-                        logger.info("Report submitted successfully")
-                        return True
-                    
-                    # If we got here, we couldn't find any more buttons to click
-                    # Check if the report dialog is still visible
-                    try:
-                        dialog_visible = False
-                        dialog_elements = self.driver.find_elements(
-                            By.XPATH, 
-                            "//ytd-report-form-modal-renderer | //tp-yt-paper-dialog[contains(., 'Report')]"
-                        )
-                        for element in dialog_elements:
-                            if element.is_displayed():
-                                dialog_visible = True
-                                break
-                        
-                        if not dialog_visible:
-                            # If the dialog is gone without explicit success message, 
-                            # assume the report was submitted
-                            self.take_screenshot("dialog_closed")
-                            logger.info("Report dialog no longer visible, assuming successful submission")
-                            return True
-                        else:
-                            # Dialog still visible but no buttons to click
-                            self.take_screenshot("dialog_stuck")
-                            logger.error("Report dialog still visible but no buttons found to proceed")
-                            return False
-                    except:
-                        # If we can't determine dialog state, be optimistic
-                        self.take_screenshot("final_state_unknown")
-                        logger.info("Unable to determine dialog state, assuming successful submission")
-                        return True
-                
-                # If we've made the maximum number of attempts
-                if attempts >= max_attempts:
-                    self.take_screenshot("max_attempts_reached")
-                    logger.warning(f"Made {max_attempts} button clicks without resolution, stopping")
-                    return False
             
+            # wait human
+            self.human_like_delay(1.0, 2.0)
+            
+            # enter text in textarea //*[@id="textarea"]
+            self.driver.find_element(By.XPATH, '//*[@id="textarea"]').send_keys(self.additional_details)
+            self.human_like_delay(1.0, 2.0)
+            
+            # report //*[@id="submit-button"]/yt-button-renderer/yt-button-shape/button
+            self.driver.find_element(By.XPATH, '//*[@id="submit-button"]/yt-button-renderer/yt-button-shape/button').click()
+            
+            self.human_like_delay(1.0, 2.0)
+            
+            # Take screenshot after clicking submit
+            self.take_screenshot("final_after_submit_click")
             return True
+            
+            # # Find and click the Next/Submit buttons until the report is completed
+            # while attempts < max_attempts:
+            #     attempts += 1
+                
+            #     # Take a screenshot for debugging before looking for buttons
+            #     self.take_screenshot(f"submit_attempt_{attempts}")
+                
+            #     # Check for text area to enter additional details (per user's requirement)
+            #     text_area_found = False
+            #     text_area_selectors = [
+            #         "//textarea",
+            #         "//textarea[@placeholder]",
+            #         "//textarea[contains(@aria-label, 'details')]",
+            #         "//input[@type='text' and contains(@placeholder, 'details')]",
+            #         "//div[@role='textbox']"
+            #     ]
+                
+            #     for selector in text_area_selectors:
+            #         try:
+            #             elements = self.driver.find_elements(By.XPATH, selector)
+            #             for element in elements:
+            #                 try:
+            #                     if element.is_displayed():
+            #                         # Scroll to the text area
+            #                         self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", element)
+            #                         self.human_like_delay(0.5, 1.0)
+                                    
+            #                         # Clear any existing text and focus the field
+            #                         element.clear()
+            #                         element.click()
+            #                         self.human_like_delay(0.3, 0.7)
+                                    
+            #                         # Determine what text to enter
+            #                         text_to_enter = self.additional_details if self.additional_details else "This content violates community guidelines and is inappropriate."
+                                    
+            #                         # Type the text like a human would - character by character with slight delays
+            #                         for char in text_to_enter:
+            #                             element.send_keys(char)
+            #                             self.human_like_delay(0.03, 0.15)  # Very short delays between keystrokes
+                                    
+            #                         logger.info("Entered additional details in text area")
+            #                         self.human_like_delay(0.8, 1.2)
+            #                         text_area_found = True
+                                    
+            #                         # Take screenshot after entering details
+            #                         self.take_screenshot("after_entering_details")
+            #                         break
+            #                 except:
+            #                     continue
+            #         except:
+            #             continue
+                    
+            #         if text_area_found:
+            #             break
+                
+            #     # Enhanced button patterns for the latest YouTube UI
+            #     button_patterns = [
+            #         # Submit buttons
+            #         "//button[contains(@aria-label, 'Submit')]",
+            #         "//button[contains(text(), 'Submit')]",
+            #         "//button[contains(., 'Submit')]",
+            #         "//paper-button[contains(text(), 'Submit')]",
+            #         "//tp-yt-paper-button[contains(text(), 'Submit')]",
+            #         "//yt-button-renderer[contains(., 'Submit')]",
+            #         "//div[@role='button'][contains(., 'Submit')]",
+                    
+            #         # Next buttons
+            #         "//button[contains(@aria-label, 'Next')]",
+            #         "//button[contains(text(), 'Next')]",
+            #         "//button[contains(., 'Next')]",
+            #         "//paper-button[contains(text(), 'Next')]",
+            #         "//tp-yt-paper-button[contains(text(), 'Next')]",
+            #         "//yt-button-renderer[contains(., 'Next')]",
+            #         "//div[@role='button'][contains(., 'Next')]",
+                    
+            #         # Report buttons (sometimes used as final action)
+            #         "//button[contains(text(), 'Report')]",
+            #         "//button[contains(., 'Report')]",
+            #         "//paper-button[contains(text(), 'Report')]",
+            #         "//tp-yt-paper-button[contains(text(), 'Report')]",
+                    
+            #         # Send buttons (sometimes used instead of Submit)
+            #         "//button[contains(text(), 'Send')]",
+            #         "//button[contains(., 'Send')]",
+            #         "//paper-button[contains(text(), 'Send')]",
+            #         "//tp-yt-paper-button[contains(text(), 'Send')]",
+                    
+            #         # Generic buttons that might be used for submission
+            #         "//yt-formatted-string[contains(@id, 'submit')]/ancestor::button",
+            #         "//yt-formatted-string[contains(@id, 'next')]/ancestor::button",
+            #         "//yt-formatted-string[contains(@id, 'report')]/ancestor::button"
+            #     ]
+                
+            #     # Try to find any button in the dialog that might be next/submit/report
+            #     found_button = False
+            #     for pattern in button_patterns:
+            #         try:
+            #             elements = self.driver.find_elements(By.XPATH, pattern)
+            #             for button in elements:
+            #                 try:
+            #                     if button.is_displayed() and button.is_enabled():
+            #                         # Try to make button visible and interactable
+            #                         self.driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", button)
+            #                         self.human_like_delay(0.5, 1.0)
+                                    
+            #                         try:
+            #                             # Hover over the button first like a human would
+            #                             ActionChains(self.driver).move_to_element(button).perform()
+            #                             self.human_like_delay(0.3, 0.7)
+            #                             button.click()
+            #                         except Exception as e:
+            #                             logger.warning(f"Standard click failed: {e}. Trying JavaScript click.")
+            #                             self.driver.execute_script("arguments[0].click();", button)
+                                    
+            #                         logger.info(f"Clicked button matching pattern: {pattern}")
+            #                         found_button = True
+            #                         self.human_like_delay(1.5, 2.5)  # Let the UI update
+            #                         break
+            #                 except:
+            #                     continue
+                        
+            #             if found_button:
+            #                 break
+            #         except:
+            #             continue
+                
+            #     if not found_button:
+            #         # Check if a success message is visible (various formats)
+            #         success_patterns = [
+            #             "//yt-formatted-string[contains(text(), 'Thanks for reporting')]",
+            #             "//div[contains(text(), 'Thanks for reporting')]",
+            #             "//span[contains(text(), 'Thanks for reporting')]",
+            #             "//div[contains(text(), 'Thank you for reporting')]",
+            #             "//yt-formatted-string[contains(text(), 'Thank you for reporting')]",
+            #             "//div[contains(text(), 'has been reported')]",
+            #             "//yt-formatted-string[contains(text(), 'has been reported')]",
+            #             "//div[contains(@class, 'success-message')]",
+            #             "//div[contains(@id, 'success')]",
+            #             "//p[contains(text(), 'report') and contains(text(), 'received')]"
+            #         ]
+                    
+            #         success_found = False
+            #         for pattern in success_patterns:
+            #             try:
+            #                 elements = self.driver.find_elements(By.XPATH, pattern)
+            #                 for element in elements:
+            #                     if element.is_displayed():
+            #                         logger.info(f"Success message found: {element.text}")
+            #                         success_found = True
+            #                         break
+            #                 if success_found:
+            #                     break
+            #             except:
+            #                 continue
+                    
+            #         if success_found:
+            #             # Take a final success screenshot
+            #             self.take_screenshot("report_success")
+            #             logger.info("Report submitted successfully")
+            #             return True
+                    
+            #         # If we got here, we couldn't find any more buttons to click
+            #         # Check if the report dialog is still visible
+            #         try:
+            #             dialog_visible = False
+            #             dialog_elements = self.driver.find_elements(
+            #                 By.XPATH, 
+            #                 "//ytd-report-form-modal-renderer | //tp-yt-paper-dialog[contains(., 'Report')]"
+            #             )
+            #             for element in dialog_elements:
+            #                 if element.is_displayed():
+            #                     dialog_visible = True
+            #                     break
+                        
+            #             if not dialog_visible:
+            #                 # If the dialog is gone without explicit success message, 
+            #                 # assume the report was submitted
+            #                 self.take_screenshot("dialog_closed")
+            #                 logger.info("Report dialog no longer visible, assuming successful submission")
+            #                 return True
+            #             else:
+            #                 # Dialog still visible but no buttons to click
+            #                 self.take_screenshot("dialog_stuck")
+            #                 logger.error("Report dialog still visible but no buttons found to proceed")
+            #                 return False
+            #         except:
+            #             # If we can't determine dialog state, be optimistic
+            #             self.take_screenshot("final_state_unknown")
+            #             logger.info("Unable to determine dialog state, assuming successful submission")
+            #             return True
+                
+            #     # If we've made the maximum number of attempts
+            #     if attempts >= max_attempts:
+            #         self.take_screenshot("max_attempts_reached")
+            #         logger.warning(f"Made {max_attempts} button clicks without resolution, stopping")
+            #         return False
+            
+            # return True
             
         except ElementClickInterceptedException as e:
             logger.error(f"Element click was intercepted: {e}")
@@ -1054,7 +1086,7 @@ class YouTubeReporter:
             if not self.select_report_reason(report_type):
                 return False
             
-            input ("done?????")
+            # input ("done?????")
             
             # Submit the report
             success = self.submit_report()
@@ -1125,7 +1157,7 @@ def main():
     # logger.info(f"Using cookies file: {args.cookies if args.cookies else 'None'}")
     
     url = "https://www.youtube.com/watch?v=vzCqJGO80Is"
-    type1 = "spam"
+    type1 = "misinformation"
     
     # Create the YouTube reporter
     reporter = YouTubeReporter(
