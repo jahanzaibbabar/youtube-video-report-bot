@@ -3,7 +3,7 @@
 <head>
     <title>YouTube Video Report</title>
     <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         /* Base Styles */
@@ -93,6 +93,27 @@
             background: #4356b5;
             transform: translateY(-2px);
         }
+        button:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        /* Spinner */
+        .spinner {
+            margin-left: 10px;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top: 2px solid #5563DE;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Notification Messages */
         .success, .error {
             padding: 14px 16px;
@@ -118,7 +139,6 @@
             margin-right: 8px;
             color: #dc3545;
         }
-        /* Media and Links */
         iframe {
             margin-top: 20px;
             width: 100%;
@@ -176,7 +196,7 @@
 <body>
     <div class="container">
         <h2><i class="fas fa-bullseye"></i>YouTube Reporting Tool</h2>
-        
+
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
@@ -195,7 +215,7 @@
         <form method="POST" action="{{ url_for('submit_report') }}">
             <label>Video URL:</label>
             <input type="text" name="video_url" required placeholder="https://www.youtube.com/watch?v=xxxxx">
-            
+
             <label>Report Category:</label>
             <select name="report_category" required>
                 <option value="">-- Select Reason --</option>
@@ -209,11 +229,14 @@
                 <option value="terrorism">Promotes terrorism</option>
                 <option value="spam">Spam or misleading</option>
             </select>
-            
+
             <label>Additional Details (Optional):</label>
             <textarea name="report_details" rows="4" placeholder="Provide any additional information about your report..."></textarea>
 
-            <button type="submit"><i class="fas fa-rocket"></i> Submit Report</button>
+            <button type="submit" id="submitBtn">
+                <i class="fas fa-rocket"></i> Submit Report
+                <span id="spinner" class="spinner" style="display: none;"></span>
+            </button>
         </form>
 
         {% if screenshot_path %}
@@ -226,8 +249,8 @@
             <ul>
                 {% for report in reports %}
                 <li>
-                    <a href="{{ report.video_url }}" target="_blank">{{ report.video_url }}</a> - 
-                    {{ report.report_category }} 
+                    <a href="{{ report.video_url }}" target="_blank">{{ report.video_url }}</a> -
+                    {{ report.report_category }}
                     <small>({{ report.format_timestamp() }})</small>
                 </li>
                 {% endfor %}
@@ -237,5 +260,18 @@
             <p>No reports submitted yet.</p>
         {% endif %}
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.querySelector('form');
+            const submitBtn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('spinner');
+
+            form.addEventListener('submit', function () {
+                submitBtn.disabled = true;
+                spinner.style.display = 'inline-block';
+            });
+        });
+    </script>
 </body>
 </html>

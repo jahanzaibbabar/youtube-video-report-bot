@@ -54,13 +54,15 @@ db.init_app(app)
 
 # Import models here to avoid circular imports
 from models import VideoReport
+from email.mime.base import MIMEBase
+from email import encoders
 
 # Create database tables
 with app.app_context():
     db.create_all()
 
 
-def send_email_notification(video_url, report_category, report_details):
+def send_email_notification(video_url, report_category, report_details, success, screenshot_path=None):
     """Send email notification about the new report"""
     if not app.config["EMAIL_ENABLED"]:
         app.logger.info("Email notifications are disabled.")
@@ -74,29 +76,53 @@ def send_email_notification(video_url, report_category, report_details):
         )
         return False
 
-    msg = MIMEMultipart()
+    # Create the email message
+    msg = MIMEMultipart('related')
     msg['From'] = app.config["EMAIL_USER"]
     msg['To'] = app.config["EMAIL_RECEIVER"]
-    msg['Subject'] = f'New Video Report: {report_category}'
 
-    body = f'''
-    A new report has been submitted:
+    status = "Success" if success else "Failure"
+    msg['Subject'] = f'New Video Report! Type: {report_category} - Status: {status}'
 
-    Video URL: {video_url}
-    Report Category: {report_category}
-    Report Details: {report_details or "No additional details provided."}
-    
-    View all reports in the admin dashboard.
-    '''
+    # Email body
+    body = f"""
+    <html>
+        <body>
+            <p>A new video report has been submitted.</p>
+            <p><strong>Status:</strong> {status}</p>
+            <p><strong>Video URL:</strong> {video_url}</p>
+            <p><strong>Report Category:</strong> {report_category}</p>
+            <p><strong>Report Details:</strong> {report_details or "No additional details provided."}</p>
+            <p><strong>Screenshot:</strong></p>
+            {f'<img src="cid:screenshot" alt="Screenshot" style="max-width: 600px;"/>' if screenshot_path else "<p>No screenshot available.</p>"}
+        </body>
+    </html>
+    """
+    msg.attach(MIMEText(body, 'html'))
 
-    msg.attach(MIMEText(body, 'plain'))
+    # Attach screenshot inline if available
+    if screenshot_path:
+        try:
+            with open(screenshot_path, 'rb') as f:
+                screenshot_data = f.read()
+            screenshot_filename = os.path.basename(screenshot_path)
 
+            attachment = MIMEBase('application', 'octet-stream')
+            attachment.set_payload(screenshot_data)
+            encoders.encode_base64(attachment)
+            attachment.add_header('Content-Disposition', f'attachment; filename={screenshot_filename}')
+            attachment.add_header('Content-ID', '<screenshot>')
+            attachment.add_header('X-Attachment-Id', 'screenshot')
+            msg.attach(attachment)
+        except Exception as e:
+            app.logger.warning(f"Failed to attach screenshot: {str(e)}")
+
+    # Send the email
     try:
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
             server.login(app.config["EMAIL_USER"], app.config["EMAIL_PASS"])
             server.send_message(msg)
-        app.logger.info(
-            f"Email notification sent to {app.config['EMAIL_RECEIVER']}")
+        app.logger.info(f"Email notification sent to {app.config['EMAIL_RECEIVER']}")
         return True
     except Exception as e:
         app.logger.error(f"Failed to send email notification: {str(e)}")
@@ -136,6 +162,10 @@ def submit_report():
     
     # report video
     success, screenshot_path = report_video(video_url, report_category, report_details)
+    
+    email_sent = send_email_notification(video_url, report_category,
+                                             report_details, success, screenshot_path)
+    
     if not success:
         flash('Failed to report the video. Please try again.', 'danger')
         return redirect(url_for('index', screenshot_path=screenshot_path ))
@@ -157,8 +187,7 @@ def submit_report():
         db.session.commit()
 
         # Send email notification
-        email_sent = send_email_notification(video_url, report_category,
-                                             report_details)
+        
 
         if email_sent:
             flash(
@@ -201,4 +230,27 @@ def page_not_found(e):
 def server_error(e):
     app.logger.error(f"Server error: {str(e)}")
     return render_template('index.html'), 500
+
+
+# Route to download the log file as a text file
+@app.route('/logs')
+def download_logs():
+    log_file_path = 'youtube_reporter.log'
+    if os.path.exists(log_file_path):
+        try:
+            with open(log_file_path, 'r') as log_file:
+                logs = log_file.read()
+            return logs, 200, {
+                'Content-Type': 'text/plain',
+                'Content-Disposition': f'attachment; filename={os.path.basename(log_file_path)}'
+            }
+        except Exception as e:
+            app.logger.error(f"Error reading log file: {str(e)}")
+            flash('An error occurred while accessing the log file.', 'danger')
+            return redirect(url_for('index'))
+    else:
+        app.logger.warning("Log file not found.")
+        flash('Log file not found.', 'danger')
+        return redirect(url_for('index'))
+
 
