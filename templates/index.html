@@ -2,29 +2,191 @@
 <html>
 <head>
     <title>YouTube Video Report</title>
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: Arial; background: #f3f3f3; padding: 30px; }
-        .container { background: white; padding: 20px; border-radius: 10px; max-width: 600px; margin: auto; }
-        input, select, textarea, button { width: 100%; padding: 10px; margin: 10px 0; }
-        .success { background: #d4edda; padding: 10px; border-left: 5px solid green; margin-bottom: 15px; }
-        .error { background: #f8d7da; padding: 10px; border-left: 5px solid red; margin-bottom: 15px; }
-        iframe { margin-top: 20px; width: 100%; height: 300px; }
-        .thumb { width: 100%; border-radius: 8px; margin-top: 10px; }
-        ul { padding-left: 20px; }
-        h2, h3 { color: #333; }
-        a { color: #0275d8; text-decoration: none; }
-        a:hover { text-decoration: underline; }
+        /* Base Styles */
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #74ABE2, #5563DE);
+            margin: 0;
+            padding: 40px 10px;
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            background: #fff;
+            max-width: 600px;
+            width: 100%;
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            animation: fadeIn 0.8s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        h2, h3 {
+            margin-top: 0;
+            font-weight: 500;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        h2 i {
+            margin-right: 10px;
+            color: #5563DE;
+        }
+        h3 {
+            color: #34495e;
+            margin: 25px 0 15px;
+        }
+        h3 i {
+            margin-right: 8px;
+            color: #5563DE;
+        }
+        /* Form Elements */
+        label {
+            font-weight: 500;
+            margin-bottom: 5px;
+            display: block;
+        }
+        input[type="text"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 14px 16px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+        input[type="text"]:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #5563DE;
+            box-shadow: 0 0 8px rgba(85, 99, 222, 0.2);
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 14px 16px;
+            background: #5563DE;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #4356b5;
+            transform: translateY(-2px);
+        }
+        /* Notification Messages */
+        .success, .error {
+            padding: 14px 16px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            font-weight: 500;
+        }
+        .success {
+            background: #d4edda;
+            border-left: 6px solid #28a745;
+        }
+        .success i {
+            margin-right: 8px;
+            color: #28a745;
+        }
+        .error {
+            background: #f8d7da;
+            border-left: 6px solid #dc3545;
+        }
+        .error i {
+            margin-right: 8px;
+            color: #dc3545;
+        }
+        /* Media and Links */
+        iframe {
+            margin-top: 20px;
+            width: 100%;
+            height: 300px;
+            border: none;
+            border-radius: 8px;
+        }
+        .thumb {
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 10px;
+            transition: transform 0.3s ease;
+        }
+        .thumb:hover {
+            transform: scale(1.02);
+        }
+        ul {
+            list-style-type: disc;
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        a {
+            color: #5563DE;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        a:hover {
+            color: #4356b5;
+            text-decoration: underline;
+        }
+        p {
+            text-align: center;
+            margin-top: 20px;
+        }
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            body {
+                padding: 20px 10px;
+            }
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            h2 {
+                font-size: 22px;
+            }
+            h3 {
+                font-size: 18px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>🎯 YouTube Reporting Tool</h2>
+        <h2><i class="fas fa-bullseye"></i>YouTube Reporting Tool</h2>
         
         {% with messages = get_flashed_messages(with_categories=true) %}
             {% if messages %}
                 {% for category, message in messages %}
                     <div class="{% if category == 'success' %}success{% else %}error{% endif %}">
-                        {% if category == 'success' %}✅{% else %}❌{% endif %} {{ message }}
+                        {% if category == 'success' %}
+                            <i class="fas fa-check-circle"></i>
+                        {% else %}
+                            <i class="fas fa-times-circle"></i>
+                        {% endif %}
+                        {{ message }}
                     </div>
                 {% endfor %}
             {% endif %}
@@ -51,16 +213,15 @@
             <label>Additional Details (Optional):</label>
             <textarea name="report_details" rows="4" placeholder="Provide any additional information about your report..."></textarea>
 
-            <button type="submit">🚀 Submit Report</button>
+            <button type="submit"><i class="fas fa-rocket"></i> Submit Report</button>
         </form>
 
         {% if screenshot_path %}
-
-        <h3>🖼️ Screenshot:</h3>
+        <h3><i class="fas fa-image"></i>Screenshot:</h3>
         <img src="{{screenshot_path}}" alt="screenshot" class="thumb">
         {% endif %}
 
-        <h3>📜 Recent Reports</h3>
+        <h3><i class="fas fa-file-alt"></i>Recent Reports</h3>
         {% if reports %}
             <ul>
                 {% for report in reports %}
