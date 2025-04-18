@@ -36,6 +36,7 @@ from selenium.common.exceptions import (
     InvalidArgumentException
 )
 
+from cookies_manager import load_cookies
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
@@ -87,79 +88,92 @@ class YouTubeReporter:
         self.wait_time = 10  # Default wait time in seconds
         self.screenshots_taken = 0
 
-    def setup_driver(self):
-        """Set up and configure the undetected ChromeDriver."""
-        try:
-            # Take a timestamp for the screenshot filename
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # def setup_driver(self):
+    #     """Set up and configure the undetected ChromeDriver."""
+    #     try:
+    #         # Take a timestamp for the screenshot filename
+    #         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             
-            # Configure undetected-chromedriver options
-            options = uc.ChromeOptions()
-            if self.headless:
-                options.add_argument("--headless=new")  # Updated headless mode syntax
+    #         # Configure undetected-chromedriver options
+    #         options = uc.ChromeOptions()
+    #         if self.headless:
+    #             options.add_argument("--headless=new")  # Updated headless mode syntax
             
-            options.add_argument("--no-sandbox")
-            options.add_argument("--disable-dev-shm-usage")
-            options.add_argument("--window-size=1920,1080")
+    #         options.add_argument("--no-sandbox")
+    #         options.add_argument("--disable-dev-shm-usage")
+    #         options.add_argument("--window-size=1920,1080")
             
-            current_dir = os.getcwd()
-            # Join the current directory path with the desired folder name for user data
-            user_data_dir = os.path.join(current_dir, "chrome_profile")
+    #         current_dir = os.getcwd()
+    #         # Join the current directory path with the desired folder name for user data
+    #         user_data_dir = os.path.join(current_dir, "chrome_profile")
 
-            # Ensure the user data directory exists; if not, create it.
-            if not os.path.exists(user_data_dir):
-                os.makedirs(user_data_dir)
-                print(f"Created user data directory at: {user_data_dir}")
+    #         # Ensure the user data directory exists; if not, create it.
+    #         if not os.path.exists(user_data_dir):
+    #             os.makedirs(user_data_dir)
+    #             print(f"Created user data directory at: {user_data_dir}")
 
-            # Set up Chrome options with the persistent user data directory.
-            options.add_argument(f"--user-data-dir={user_data_dir}")
+    #         # Set up Chrome options with the persistent user data directory.
+    #         options.add_argument(f"--user-data-dir={user_data_dir}")
             
-            # Create the undetected ChromeDriver
-            try:
-                self.driver = uc.Chrome(options=options)
-                self.driver.implicitly_wait(self.wait_time)
-                logger.info("Undetected ChromeDriver initialized successfully")
-            except Exception as e:
-                logger.error(f"Failed to initialize undetected ChromeDriver: {str(e)}")
-                # Try to save a screenshot if an error occurs during initialization
+    #         # Create the undetected ChromeDriver
+    #         try:
+    #             self.driver = uc.Chrome(options=options)
+    #             self.driver.implicitly_wait(self.wait_time)
+    #             logger.info("Undetected ChromeDriver initialized successfully")
+    #         except Exception as e:
+    #             logger.error(f"Failed to initialize undetected ChromeDriver: {str(e)}")
+    #             # Try to save a screenshot if an error occurs during initialization
                
+    #             return False
+            
+    #         # Load cookies if provided
+    #         if self.cookies_path and os.path.exists(self.cookies_path):
+    #             try:
+    #                 with open(self.cookies_path, 'r') as f:
+    #                     cookies = json.load(f)
+                    
+    #                 # First navigate to YouTube domain to set cookies
+    #                 self.driver.get("https://www.youtube.com")
+    #                 self.human_like_delay()
+                    
+    #                 # Add the cookies to the driver
+    #                 for cookie in cookies:
+    #                     try:
+    #                         self.driver.add_cookie(cookie)
+    #                     except Exception as e:
+    #                         logger.debug(f"Error adding cookie: {str(e)}")
+                    
+    #                 logger.info("Cookies loaded successfully")
+    #             except Exception as e:
+    #                 logger.error(f"Error loading cookies: {str(e)}")
+            
+    #         return True
+            
+    #     except SessionNotCreatedException as e:
+    #         logger.error(f"Failed to create a new ChromeDriver session: {str(e)}")
+    #         logger.info("This may be due to a Chrome version mismatch. Try updating your Chrome browser.")
+    #         return False
+            
+    #     except WebDriverException as e:
+    #         logger.error(f"Failed to initialize ChromeDriver: {str(e)}")
+    #         return False
+            
+    #     except Exception as e:
+    #         logger.error(f"Unexpected error during driver setup: {str(e)}")
+    #         return False
+    
+    def setup_driver(self):
+        try:
+            self.driver = load_cookies()
+            if not self.driver:
+                logger.error("Failed to load cookies. Exiting.")
                 return False
             
-            # Load cookies if provided
-            if self.cookies_path and os.path.exists(self.cookies_path):
-                try:
-                    with open(self.cookies_path, 'r') as f:
-                        cookies = json.load(f)
-                    
-                    # First navigate to YouTube domain to set cookies
-                    self.driver.get("https://www.youtube.com")
-                    self.human_like_delay()
-                    
-                    # Add the cookies to the driver
-                    for cookie in cookies:
-                        try:
-                            self.driver.add_cookie(cookie)
-                        except Exception as e:
-                            logger.debug(f"Error adding cookie: {str(e)}")
-                    
-                    logger.info("Cookies loaded successfully")
-                except Exception as e:
-                    logger.error(f"Error loading cookies: {str(e)}")
-            
             return True
-            
-        except SessionNotCreatedException as e:
-            logger.error(f"Failed to create a new ChromeDriver session: {str(e)}")
-            logger.info("This may be due to a Chrome version mismatch. Try updating your Chrome browser.")
-            return False
-            
-        except WebDriverException as e:
-            logger.error(f"Failed to initialize ChromeDriver: {str(e)}")
-            return False
-            
         except Exception as e:
-            logger.error(f"Unexpected error during driver setup: {str(e)}")
+            logger.error(f"Failed to create a new ChromeDriver session: {str(e)}")
             return False
+        
 
     def human_like_delay(self, min_seconds=0.5, max_seconds=2.5):
         """Add a random delay to mimic human behavior."""
@@ -604,29 +618,30 @@ class YouTubeReporter:
             return success
 
 def report_video(url, report_type, additional_details=''):
-    """Main entry point for the script."""
+    """Main entry point for the script with retry logic."""
     global latest_screenshot
     latest_screenshot = None
-    
-    # url = "https://www.youtube.com/watch?v=vzCqJGO80Is"
-    # type1 = "misinformation"
-    
-    # Create the YouTube reporter
+
     reporter = YouTubeReporter(
         headless=True,
         cookies_path=False,
         additional_details=additional_details,
     )
-    
-    # Report the video
-    success = reporter.report_video(url, report_type)
-    
-    if success:
-        print("\n✅ Video reported successfully!")
-        return True, latest_screenshot
-    else:
-        print("\n❌ Failed to report the video. Check the logs for details.")
-        return False, latest_screenshot
+
+    max_retries = 2
+    for attempt in range(1, max_retries + 2):  # 1 original try + 2 retries
+        print(f"\n🔁 Attempt {attempt} to report the video...")
+        success = reporter.report_video(url, report_type)
+
+        if success:
+            print("\n✅ Video reported successfully!")
+            return True, latest_screenshot
+        else:
+            print("❌ Failed to report the video.")
+
+    print("\n❌ All attempts to report the video have failed. Check the logs for details.")
+    return False, latest_screenshot
+
 
 if __name__ == "__main__":
     report_video()

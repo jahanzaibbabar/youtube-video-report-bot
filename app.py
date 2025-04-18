@@ -88,7 +88,7 @@ def send_email_notification(video_url, report_category, report_details, success,
     body = f"""
     <html>
         <body>
-            <p>A new video report has been submitted.</p>
+            <h1>A new video report!</h1>
             <p><strong>Status:</strong> {status}</p>
             <p><strong>Video URL:</strong> {video_url}</p>
             <p><strong>Report Category:</strong> {report_category}</p>
