@@ -1,277 +1,222 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>YouTube Video Report</title>
-    <!-- Font Awesome for Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
-    <style>
-        /* Base Styles */
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #74ABE2, #5563DE);
-            margin: 0;
-            padding: 40px 10px;
-            color: #333;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            background: #fff;
-            max-width: 600px;
-            width: 100%;
-            padding: 30px 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-            animation: fadeIn 0.8s ease-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        h2, h3 {
-            margin-top: 0;
-            font-weight: 500;
-        }
-        h2 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        h2 i {
-            margin-right: 10px;
-            color: #5563DE;
-        }
-        h3 {
-            color: #34495e;
-            margin: 25px 0 15px;
-        }
-        h3 i {
-            margin-right: 8px;
-            color: #5563DE;
-        }
-        /* Form Elements */
-        label {
-            font-weight: 500;
-            margin-bottom: 5px;
-            display: block;
-        }
-        input[type="text"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 14px 16px;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-            font-size: 15px;
-        }
-        input[type="text"]:focus,
-        select:focus,
-        textarea:focus {
-            border-color: #5563DE;
-            box-shadow: 0 0 8px rgba(85, 99, 222, 0.2);
-            outline: none;
-        }
-        button {
-            width: 100%;
-            padding: 14px 16px;
-            background: #5563DE;
-            border: none;
-            border-radius: 6px;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background 0.3s ease, transform 0.2s ease;
-            margin-top: 10px;
-        }
-        button:hover {
-            background: #4356b5;
-            transform: translateY(-2px);
-        }
-        button:disabled {
-            opacity: 0.7;
-            cursor: not-allowed;
-        }
-        /* Spinner */
-        .spinner {
-            margin-left: 10px;
-            width: 16px;
-            height: 16px;
-            border: 2px solid #fff;
-            border-top: 2px solid #5563DE;
-            border-radius: 50%;
-            animation: spin 0.6s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Notification Messages */
-        .success, .error {
-            padding: 14px 16px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            font-weight: 500;
-        }
-        .success {
-            background: #d4edda;
-            border-left: 6px solid #28a745;
-        }
-        .success i {
-            margin-right: 8px;
-            color: #28a745;
-        }
-        .error {
-            background: #f8d7da;
-            border-left: 6px solid #dc3545;
-        }
-        .error i {
-            margin-right: 8px;
-            color: #dc3545;
-        }
-        iframe {
-            margin-top: 20px;
-            width: 100%;
-            height: 300px;
-            border: none;
-            border-radius: 8px;
-        }
-        .thumb {
-            width: 100%;
-            border-radius: 8px;
-            margin-top: 10px;
-            transition: transform 0.3s ease;
-        }
-        .thumb:hover {
-            transform: scale(1.02);
-        }
-        ul {
-            list-style-type: disc;
-            padding-left: 20px;
-        }
-        li {
-            margin-bottom: 8px;
-        }
-        a {
-            color: #5563DE;
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        a:hover {
-            color: #4356b5;
-            text-decoration: underline;
-        }
-        p {
-            text-align: center;
-            margin-top: 20px;
-        }
-        /* Responsive Design */
-        @media (max-width: 600px) {
-            body {
-                padding: 20px 10px;
-            }
-            .container {
-                padding: 20px;
-                margin: 10px;
-            }
-            h2 {
-                font-size: 22px;
-            }
-            h3 {
-                font-size: 18px;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>YouTube Video Report</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #5563DE;
+      --primary-hover: #4356b5;
+      --bg: #fff;
+      --text: #2c3e50;
+      --input-bg: #f9f9f9;
+      --radius: 8px;
+      --gap: 16px;
+      --transition: 0.3s;
+      --touch: 20px; /* minimum touch area */
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: var(--gap);
+      text-align: center;
+      flex: none;
+    }
+    header h1 {
+      font-size: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: var(--gap);
+    }
+    label {
+      display: block;
+      font-weight: 500;
+      margin-top: var(--gap);
+      font-size: 0.95rem;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: var(--touch);
+      font-size: 1rem;
+      margin-top: 8px;
+      border: 1px solid #ddd;
+      border-radius: var(--radius);
+      background: var(--input-bg);
+      transition: border var(--transition), box-shadow var(--transition);
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 6px rgba(85,99,222,0.2);
+    }
+    button {
+      width: 100%;
+      padding: var(--touch);
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      font-weight: 500;
+      margin-top: var(--gap);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition), transform 0.15s ease;
+    }
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+    .notification {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      margin-top: var(--gap);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+      gap: 8px;
+    }
+    .success { background: #d4edda; border-left: 4px solid #28a745; }
+    .error   { background: #f8d7da; border-left: 4px solid #dc3545; }
+    .report-card {
+      margin-top: var(--gap);
+      padding: var(--gap);
+      background: var(--input-bg);
+      border-radius: var(--radius);
+      font-size: 0.9rem;
+    }
+    .report-card a {
+      font-weight: 500;
+      word-break: break-all;
+    }
+    .report-card time {
+      display: block;
+      margin-top: 4px;
+      color: #666;
+      font-size: 0.8rem;
+    }
+    img.thumb, iframe {
+      width: 100%;
+      border-radius: var(--radius);
+      margin-top: var(--gap);
+    }
+    .history-link {
+      display: block;
+      text-align: center;
+      margin: var(--gap) 0;
+      font-size: 0.9rem;
+      color: var(--primary);
+    }
+    .history-link:hover {
+      color: var(--primary-hover);
+    }
+    .spinner {
+      margin-left: 8px;
+      width: 16px;
+      height: 16px;
+      border: 2px solid #fff;
+      border-top: 2px solid var(--primary);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2><i class="fas fa-bullseye"></i>YouTube Reporting Tool</h2>
-
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="{% if category == 'success' %}success{% else %}error{% endif %}">
-                        {% if category == 'success' %}
-                            <i class="fas fa-check-circle"></i>
-                        {% else %}
-                            <i class="fas fa-times-circle"></i>
-                        {% endif %}
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-
-        <form method="POST" action="{{ url_for('submit_report') }}">
-            <label>Video URL:</label>
-            <input type="text" name="video_url" required placeholder="https://www.youtube.com/watch?v=xxxxx">
-
-            <label>Report Category:</label>
-            <select name="report_category" required>
-                <option value="">-- Select Reason --</option>
-                <option value="sexual">Sexual content</option>
-                <option value="violent">Violent or repulsive content</option>
-                <option value="hateful">Hateful or abusive content</option>
-                <option value="harassment">Harassment or bullying</option>
-                <option value="harmful">Harmful or dangerous acts</option>
-                <option value="misinformation">Misinformation</option>
-                <option value="child">Child abuse</option>
-                <option value="terrorism">Promotes terrorism</option>
-                <option value="spam">Spam or misleading</option>
-            </select>
-
-            <label>Additional Details (Optional):</label>
-            <textarea name="report_details" rows="4" placeholder="Provide any additional information about your report..."></textarea>
-
-            <button type="submit" id="submitBtn">
-                <i class="fas fa-rocket"></i> Submit Report
-                <span id="spinner" class="spinner" style="display: none;"></span>
-            </button>
-        </form>
-
-        {% if screenshot_path %}
-        <h3><i class="fas fa-image"></i>Screenshot:</h3>
-        <img src="{{screenshot_path}}" alt="screenshot" class="thumb">
-        {% endif %}
-
-        <h3><i class="fas fa-file-alt"></i>Recent Reports</h3>
-        {% if reports %}
-            <ul>
-                {% for report in reports %}
-                <li>
-                    <a href="{{ report.video_url }}" target="_blank">{{ report.video_url }}</a> -
-                    {{ report.report_category }}
-                    <small>({{ report.format_timestamp() }})</small>
-                </li>
-                {% endfor %}
-            </ul>
-            <p><a href="{{ url_for('history') }}">View all reports →</a></p>
-        {% else %}
-            <p>No reports submitted yet.</p>
-        {% endif %}
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const form = document.querySelector('form');
-            const submitBtn = document.getElementById('submitBtn');
-            const spinner = document.getElementById('spinner');
-
-            form.addEventListener('submit', function () {
-                submitBtn.disabled = true;
-                spinner.style.display = 'inline-block';
-            });
-        });
-    </script>
+  <header>
+    <h1><i class="fas fa-bullseye"></i>YouTube Report</h1>
+  </header>
+  <main>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="notification {{ category }}" role="alert">
+            {% if category == 'success' %}<i class="fas fa-check-circle"></i>{% else %}<i class="fas fa-times-circle"></i>{% endif %}
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="POST" action="{{ url_for('submit_report') }}" novalidate>
+      <label for="video_url">Video URL</label>
+      <input type="url" id="video_url" name="video_url" required placeholder="youtube.com/shorts/****">
+      <label for="category">Reason</label>
+      <select id="category" name="report_category" required>
+        <option value="" disabled selected>Choose reason</option>
+        <option value="sexual">Sexual content</option>
+        <option value="violent">Violent content</option>
+        <option value="hateful">Hate speech</option>
+        <option value="harassment">Harassment or bullying</option>
+        <option value="harmful">Harmful or dangerous acts</option>
+        <option value="misinformation">Misinformation</option>
+        <option value="child">Child abuse</option>
+        <option value="terrorism">Promotes terrorism</option>
+        <option value="spam">Spam or misleading</option>
+      </select>
+      <label for="details">Details (optional)</label>
+      <textarea id="details" name="report_details" rows="3" placeholder="Any extra info..."></textarea>
+      <button type="submit" id="submitBtn">
+        <i class="fas fa-rocket"></i>&nbsp;Submit
+        <span id="spinner" class="spinner" hidden></span>
+      </button>
+    </form>
+    {% if screenshot_path %}
+      <img src="{{ screenshot_path }}" alt="Screenshot" class="thumb" loading="lazy">
+    {% endif %}
+    <section>
+      {% if reports %}
+        {% for report in reports %}
+          <div class="report-card">
+            <a href="{{ report.video_url }}" target="_blank" rel="noopener">{{ report.video_url }}</a>
+            <time datetime="{{ report.timestamp.isoformat() }}">{{ report.format_timestamp() }}</time>
+            <div>Category: <strong>{{ report.report_category }}</strong></div>
+          </div>
+        {% endfor %}
+      {% else %}
+        <p style="margin-top:var(--gap); text-align:center; color:#666; font-size:0.9rem;">No reports yet.</p>
+      {% endif %}
+    </section>
+    <a href="{{ url_for('history') }}" class="history-link">View all reports →</a>
+  </main>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.querySelector('form');
+      const btn = document.getElementById('submitBtn');
+      const spinner = document.getElementById('spinner');
+      form.addEventListener('submit', () => {
+        btn.disabled = true;
+        spinner.hidden = false;
+      });
+      const url = document.getElementById('video_url');
+      url.addEventListener('input', () => {
+        url.setCustomValidity(url.validity.typeMismatch ? 'Enter a valid YouTube URL.' : '');
+      });
+    });
+  </script>
 </body>
 </html>

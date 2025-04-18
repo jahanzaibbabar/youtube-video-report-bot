@@ -296,74 +296,27 @@ class YouTubeReporter:
             self.take_screenshot("navigation_error")
             return False
 
-    def open_report_dialog(self):
-        """
-        Open the report dialog by clicking the appropriate buttons.
-        Updated for the latest YouTube UI layout with human-like behavior.
-        
-        Returns:
-            bool: True if the dialog was opened successfully, False otherwise
-        """
+    def open_report_dialog_main(self):
         try:
-           
-            try:
-                dismiss_buttons = self.driver.find_elements(By.XPATH, "//button[contains(text(), 'Dismiss') or contains(text(), 'No thanks')]")
-                for button in dismiss_buttons:
-                    try:
-                        if button.is_displayed():
-                            button.click()
-                            logger.info("Dismissed a popup")
-                            self.human_like_delay()
-                    except:
-                        pass
-            except:
-                pass
-            
-            wait = WebDriverWait(self.driver, self.wait_time)
-            
-            
-            self.human_like_scroll('down', 200)
             
             self.human_like_delay(4.0, 6.0)  # Wait for the page to settle
             
-            more_action_xpath = '//yt-button-shape/button[@aria-label="More actions"]'
-            element = wait.until(EC.visibility_of_element_located((By.XPATH, more_action_xpath)))
-            # for selector in title_menu_selectors:
+            self.driver.find_element(By.XPATH, '//*[@id="button-shape"]/button').click()
             
-            more_actions_button = self.driver.find_element(By.XPATH, more_action_xpath)
-                
-            
-            if not more_actions_button:
-                # Take a screenshot to help with debugging
-                self.take_screenshot("more_actions_not_found")
-                logger.error("Could not find any 'More actions' button")
-                return False
-            
-            # Try to click with human-like behavior
-            try:
-                # Hover over the button first like a human would
-                ActionChains(self.driver).move_to_element(more_actions_button).perform()
-                self.human_like_delay(0.3, 0.7)
-                more_actions_button.click()
-            except Exception as e:
-                logger.warning(f"Standard click failed: {e}. Trying JavaScript click.")
-                # self.driver.execute_script("arguments[0].click();", more_actions_button)
-                self.take_screenshot("more_actions_click_error")
-                return False
-            
-            logger.info("Clicked 'More actions' button")
-            self.human_like_delay(1.0, 2.0)  # Wait for menu to appear
-            
-           
+            logger.info("Clicked on the 'More' button")
+            self.human_like_delay(1.0, 2.0)
+                       
+            # Click on the "Report" button
+                        
             report_selectors = "//ytd-menu-service-item-renderer//yt-formatted-string[contains(text(), 'Report')]/.."
             
             report_button = self.driver.find_element(By.XPATH, report_selectors)
             
             
-            if not report_button:
-                self.take_screenshot("report_option_not_found")
-                logger.error("Could not find the 'Report' option in the menu")
-                return False
+            # if not report_button:
+            #     self.take_screenshot("report_option_not_found")
+            #     logger.error("Could not find the 'Report' option in the menu")
+            #     return False
             
             # Try to click with human-like behavior
             try:
@@ -388,6 +341,9 @@ class YouTubeReporter:
                 "//yt-formatted-string[contains(text(), 'Report video')]",
             ]
             
+            wait = WebDriverWait(self.driver, self.wait_time)
+
+            
             dialog_visible = False
             for selector in report_dialog_selectors:
                 try:
@@ -407,10 +363,130 @@ class YouTubeReporter:
             return True
             
             
+
+            
+            
         except Exception as e:
-            logger.error(f"Unexpected error during report dialog opening: {str(e)}")
-            self.take_screenshot("unexpected_error")
+            logger.error(f"Error opening shorts report dialog: {str(e)}")
+            self.take_screenshot("shorts_report_dialog_error")
             return False
+        
+        
+    # def open_report_dialog(self):
+    #     """
+    #     Open the report dialog by clicking the appropriate buttons.
+    #     Updated for the latest YouTube UI layout with human-like behavior.
+        
+    #     Returns:
+    #         bool: True if the dialog was opened successfully, False otherwise
+    #     """
+    #     try:
+           
+    #         try:
+    #             dismiss_buttons = self.driver.find_elements(By.XPATH, "//button[contains(text(), 'Dismiss') or contains(text(), 'No thanks')]")
+    #             for button in dismiss_buttons:
+    #                 try:
+    #                     if button.is_displayed():
+    #                         button.click()
+    #                         logger.info("Dismissed a popup")
+    #                         self.human_like_delay()
+    #                 except:
+    #                     pass
+    #         except:
+    #             pass
+            
+    #         wait = WebDriverWait(self.driver, self.wait_time)
+            
+            
+    #         self.human_like_scroll('down', 200)
+            
+    #         self.human_like_delay(4.0, 6.0)  # Wait for the page to settle
+            
+    #         more_action_xpath = '//yt-button-shape/button[@aria-label="More actions"]'
+    #         element = wait.until(EC.visibility_of_element_located((By.XPATH, more_action_xpath)))
+    #         # for selector in title_menu_selectors:
+            
+    #         more_actions_button = self.driver.find_element(By.XPATH, more_action_xpath)
+                
+            
+    #         if not more_actions_button:
+    #             # Take a screenshot to help with debugging
+    #             self.take_screenshot("more_actions_not_found")
+    #             logger.error("Could not find any 'More actions' button")
+    #             return False
+            
+    #         # Try to click with human-like behavior
+    #         try:
+    #             # Hover over the button first like a human would
+    #             ActionChains(self.driver).move_to_element(more_actions_button).perform()
+    #             self.human_like_delay(0.3, 0.7)
+    #             more_actions_button.click()
+    #         except Exception as e:
+    #             logger.warning(f"Standard click failed: {e}. Trying JavaScript click.")
+    #             # self.driver.execute_script("arguments[0].click();", more_actions_button)
+    #             self.take_screenshot("more_actions_click_error")
+    #             return False
+            
+    #         logger.info("Clicked 'More actions' button")
+    #         self.human_like_delay(1.0, 2.0)  # Wait for menu to appear
+            
+           
+    #         report_selectors = "//ytd-menu-service-item-renderer//yt-formatted-string[contains(text(), 'Report')]/.."
+            
+    #         report_button = self.driver.find_element(By.XPATH, report_selectors)
+            
+            
+    #         if not report_button:
+    #             self.take_screenshot("report_option_not_found")
+    #             logger.error("Could not find the 'Report' option in the menu")
+    #             return False
+            
+    #         # Try to click with human-like behavior
+    #         try:
+    #             # Hover over the button first like a human would
+    #             ActionChains(self.driver).move_to_element(report_button).perform()
+    #             self.human_like_delay(0.3, 0.7)
+    #             report_button.click()
+    #         except Exception as e:
+    #             logger.warning(f"Standard click failed: {e}. Trying JavaScript click.")
+    #             # self.driver.execute_script("arguments[0].click();", report_button)
+    #             self.take_screenshot("report_option_click_error")
+    #             return False
+                
+    #         logger.info("Clicked 'Report' option")
+    #         self.human_like_delay(1.0, 2.0)  # Wait for report dialog to appear
+            
+    #         # Take screenshot after clicking report option
+    #         # self.take_screenshot("after_report_click")
+            
+    #         # Make sure the report dialog is visible
+    #         report_dialog_selectors = [
+    #             "//yt-formatted-string[contains(text(), 'Report video')]",
+    #         ]
+            
+    #         dialog_visible = False
+    #         for selector in report_dialog_selectors:
+    #             try:
+    #                 element = wait.until(EC.visibility_of_element_located((By.XPATH, selector)))
+    #                 if element.is_displayed():
+    #                     dialog_visible = True
+    #                     break
+    #             except:
+    #                 continue
+            
+    #         if not dialog_visible:
+    #             self.take_screenshot("report_dialog_not_visible")
+    #             logger.error("Report dialog did not appear")
+    #             return False
+            
+    #         logger.info("Report dialog opened successfully")
+    #         return True
+            
+            
+    #     except Exception as e:
+    #         logger.error(f"Unexpected error during report dialog opening: {str(e)}")
+    #         self.take_screenshot("unexpected_error")
+    #         return False
 
     def select_report_reason(self, report_type):
         """
@@ -536,7 +612,7 @@ class YouTubeReporter:
                 submit_button = self.driver.find_element(By.XPATH, '//*[@id="submit-button"]/yt-button-renderer/yt-button-shape/button')
                 submit_button.click()
                 logger.info("Clicked the submit button")
-                self.human_like_delay(1.0, 2.0)
+                self.human_like_delay(2.0, 3.0)
             except NoSuchElementException:
                 logger.error("Submit button not found. Unable to submit the report.")
                 self.take_screenshot("submit_button_not_found")
@@ -566,10 +642,10 @@ class YouTubeReporter:
         success = False
         
         # Validate the YouTube URL
-        video_id = self.validate_youtube_url(video_url)
-        if not video_id:
-            logger.error(f"Invalid YouTube URL: {video_url}")
-            return False
+        # video_id = self.validate_youtube_url(video_url)
+        # if not video_id:
+        #     logger.error(f"Invalid YouTube URL: {video_url}")
+        #     return False
         
         # Setup the WebDriver
         if not self.setup_driver():
@@ -581,7 +657,10 @@ class YouTubeReporter:
                 return False
             
             # Open the report dialog
-            if not self.open_report_dialog():
+            # if not self.open_report_dialog():
+            #     return False
+            
+            if not self.open_report_dialog_main():
                 return False
             
             # Select the report reason
@@ -593,12 +672,12 @@ class YouTubeReporter:
             success = self.submit_report()
             
             if success:
-                logger.info(f"Successfully reported video {video_id} for {report_type}")
+                logger.info(f"Successfully reported video for {report_type}")
                 # Take a final screenshot showing the final state
                 self.take_screenshot("final_state_success")
                 return True
             else:
-                logger.error(f"Failed to report video {video_id}")
+                logger.error(f"Failed to report video ")
                 # Take a screenshot of the failed state
                 self.take_screenshot("final_state_failure")
                 return False
@@ -628,7 +707,7 @@ def report_video(url, report_type, additional_details=''):
         additional_details=additional_details,
     )
 
-    max_retries = 2
+    max_retries = 1
     for attempt in range(1, max_retries + 2):  # 1 original try + 2 retries
         print(f"\n🔁 Attempt {attempt} to report the video...")
         success = reporter.report_video(url, report_type)

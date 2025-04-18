@@ -1,169 +1,187 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Report History - YouTube Video Report</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
-    <style>
-        /* Base Styles */
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
-            background: linear-gradient(135deg, #74ABE2, #5563DE);
-            margin: 0;
-            padding: 30px 10px;
-            color: #333;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .container {
-            background: #fff;
-            max-width: 800px;
-            width: 100%;
-            padding: 30px 40px;
-            border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            margin: auto;
-        }
-        h2 {
-            margin-top: 0;
-            font-weight: 500;
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        /* Notification Messages */
-        .success, .error {
-            padding: 14px 16px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            font-weight: 500;
-        }
-        .success {
-            background: #d4edda;
-            border-left: 6px solid #28a745;
-        }
-        .error {
-            background: #f8d7da;
-            border-left: 6px solid #dc3545;
-        }
-        /* Table Styles */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 20px 0;
-        }
-        th, td {
-            padding: 12px 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-            font-size: 14px;
-        }
-        th {
-            background-color: #f1f1f1;
-            font-weight: 500;
-        }
-        tbody tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        tbody tr:hover {
-            background-color: #f1f8ff;
-        }
-        /* Badge Style */
-        .badge { 
-            display: inline-block; 
-            padding: 5px 10px; 
-            border-radius: 4px; 
-            background-color: #5563DE; 
-            color: white; 
-            font-size: 12px; 
-        }
-        /* Link and Button Styles */
-        a {
-            color: #5563DE;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-        .btn {
-            display: inline-block;
-            padding: 12px 20px;
-            background-color: #5563DE;
-            color: #fff;
-            border-radius: 6px;
-            text-decoration: none;
-            margin: 20px 0;
-            transition: background 0.3s ease, transform 0.2s ease;
-        }
-        .btn:hover {
-            background-color: #4356b5;
-            transform: translateY(-2px);
-        }
-        /* Responsive adjustments */
-        @media (max-width: 600px) {
-            .container {
-                padding: 20px;
-                margin: 10px;
-            }
-            th, td {
-                padding: 10px 8px;
-                font-size: 13px;
-            }
-            .btn {
-                padding: 10px 16px;
-                font-size: 14px;
-            }
-        }
-    </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Report History - YouTube Video Report</title>
+  <!-- Google Fonts & Icons -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" crossorigin="anonymous" />
+  <style>
+    :root {
+      --primary: #5563DE;
+      --primary-hover: #4356b5;
+      --bg-gradient: linear-gradient(135deg, #74ABE2, #5563DE);
+      --card-bg: #fff;
+      --text: #2c3e50;
+      --border: #ddd;
+      --radius: 8px;
+      --gap: 16px;
+      --transition: 0.3s;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+    .container {
+      background: var(--card-bg);
+      width: 100%;
+      max-width: 800px;
+      margin: var(--gap) auto;
+      padding: 30px 40px;
+      border-radius: var(--radius);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    }
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: var(--gap);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    /* Notifications */
+    .success, .error {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      margin-bottom: var(--gap);
+      font-weight: 500;
+      gap: 8px;
+    }
+    .success { background: #d4edda; border-left: 6px solid #28a745; }
+    .error   { background: #f8d7da; border-left: 6px solid #dc3545; }
+    /* Button */
+    .btn {
+      display: inline-block;
+      padding: 12px 20px;
+      background-color: var(--primary);
+      color: #fff;
+      border-radius: var(--radius);
+      text-decoration: none;
+      margin: var(--gap) 0;
+      transition: background var(--transition), transform 0.2s ease;
+    }
+    .btn:hover { background-color: var(--primary-hover); transform: translateY(-2px); }
+    /* Table */
+    .table-responsive { overflow-x: auto; border-radius: var(--radius); }
+    .reports-table table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+    }
+    th, td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    th { background-color: #f1f1f1; font-weight: 500; }
+    tbody tr:nth-child(even) { background-color: #f9f9f9; }
+    tbody tr:hover { background-color: #eef6ff; }
+    /* Card list for mobile */
+    .reports-cards { display: none; flex-direction: column; gap: var(--gap); }
+    .report-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: var(--gap);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      font-size: 0.9rem;
+    }
+    .report-card a {
+      color: var(--primary);
+      font-weight: 500;
+      word-break: break-all;
+      font-size: 1rem;
+      display: block;
+      margin-bottom: 8px;
+    }
+    .report-card time {
+      display: block;
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    .report-card .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: var(--radius);
+      background-color: var(--primary);
+      color: #fff;
+      font-size: 12px;
+    }
+    /* Responsive breakpoints */
+    @media(max-width: 600px) {
+      .container { padding: 20px 15px; margin: var(--gap)/2 auto; }
+      h2 { font-size: 1.25rem; }
+      .btn { width: 100%; text-align: center; padding: 10px 0; font-size: 14px; }
+      /* Hide table, show cards */
+      .reports-table { display: none; }
+      .reports-cards { display: flex; }
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>📋 YouTube Report History</h2>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="{% if category == 'success' %}success{% else %}error{% endif %}">
-                        {% if category == 'success' %}✅{% else %}❌{% endif %} {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <a href="{{ url_for('index') }}" class="btn">← Back to Report Form</a>
-        
-        {% if reports %}
-            <table>
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Video URL</th>
-                        <th>Category</th>
-                        <th>Submitted</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for report in reports %}
-                    <tr>
-                        <td>{{ report.id }}</td>
-                        <td><a href="{{ report.video_url }}" target="_blank">{{ report.video_url }}</a></td>
-                        <td><span class="badge">{{ report.report_category }}</span></td>
-                        <td>{{ report.format_timestamp() }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        {% else %}
-            <p>No reports have been submitted yet.</p>
-        {% endif %}
-        
-        <a href="{{ url_for('index') }}" class="btn">Submit Another Report</a>
-    </div>
+  <div class="container">
+    <h2><i class="fas fa-history"></i> YouTube Report History</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="{{ category }}">
+            {% if category == 'success' %}<i class="fas fa-check-circle"></i>{% else %}<i class="fas fa-times-circle"></i>{% endif %}
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <a href="{{ url_for('index') }}" class="btn"><i class="fas fa-arrow-left"></i> Back to Report Form</a>
+
+    {% if reports %}
+      <div class="reports-table table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Video URL</th>
+              <th>Category</th>
+              <th>Submitted</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for report in reports %}
+            <tr>
+              <td>{{ report.id }}</td>
+              <td><a href="{{ report.video_url }}" target="_blank">{{ report.video_url }}</a></td>
+              <td><span class="badge">{{ report.report_category }}</span></td>
+              <td>{{ report.format_timestamp() }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <div class="reports-cards">
+        {% for report in reports %}
+        <div class="report-card">
+          <a href="{{ report.video_url }}" target="_blank">#{{ report.id }}: {{ report.video_url }}</a>
+          <time datetime="{{ report.timestamp.isoformat() }}">{{ report.format_timestamp() }}</time>
+          <span class="badge">{{ report.report_category }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="text-align:center; color:#666; margin-top: var(--gap);">No reports have been submitted yet.</p>
+    {% endif %}
+
+    <a href="{{ url_for('index') }}" class="btn">Submit Another Report</a>
+  </div>
 </body>
 </html>

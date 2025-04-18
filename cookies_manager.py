@@ -70,7 +70,7 @@ def load_cookies():
     chrome_options = Options()
 
     # Add options for running in headless mode
-    chrome_options.add_argument('--headless')  # Run Chrome in headless mode
+    # chrome_options.add_argument('--headless')  # Run Chrome in headless mode
     chrome_options.add_argument('--disable-gpu')  # Disable GPU acceleration (necessary in headless mode sometimes)
     chrome_options.add_argument('--no-sandbox')  # Run without sandboxing (useful for running in certain server environments)
     chrome_options.add_argument('--disable-dev-shm-usage')  # Overcome limited resource problems
@@ -84,7 +84,7 @@ def load_cookies():
     
     # Set up the WebDriver with the specified options
     # driver = webdriver.Chrome(options=chrome_options)
-    driver = uc.Chrome(options=chrome_options, version_main=131)
+    driver = uc.Chrome(options=chrome_options)
     login_using_cookie_file(driver, "cookies.json")
 
     return driver
